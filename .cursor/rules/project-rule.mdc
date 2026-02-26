@@ -1,0 +1,77 @@
+---
+alwaysApply: true
+---
+# .cursor/rules.md
+Spring Boot 대용량 트래픽 쿠폰 시스템 — Cursor Rules v1.0
+
+## 0. 목표
+- PR 단위(1~2시간)로만 변경한다.
+- 동시성(초과/중복/멱등)을 깨뜨리는 변경은 절대 금지한다.
+- 테스트 없는 기능 추가 금지(최소 1개 이상).
+
+---
+
+## 1. 코딩 규칙
+- Java 21, Spring Boot 3.2+ 기준
+- 패키지 구조는 고정:
+  - com.example.coupon.{common,campaign,claim,infrastructure}
+- Controller는 DTO만 다루고, 비즈니스는 Service에서 처리한다.
+- Repository는 도메인 규칙을 알지 않으며, Service가 규칙을 소유한다.
+- 모든 public API는 Validation을 적용한다.
+- 예외는 @ControllerAdvice에서 표준 에러 포맷으로 변환한다.
+
+---
+
+## 2. 동시성/정합성 불변 조건(절대 깨지면 안 됨)
+### (A) Oversell 방지
+- Redis `DECR stock:{campaignId}` 원자 연산으로만 처리한다.
+- 음수면 반드시 `INCR` 보상 후 SOLD_OUT 처리한다.
+
+### (B) Duplicate 방지
+- DB unique(campaign_id, user_id)가 최종 방어선이다.
+- 중복은 DUPLICATE로 귀결되어야 하며, 이 경우 재고는 `INCR` 보상한다.
+
+### (C) Idempotency
+- requestId는 클라이언트 생성 강제.
+- DB unique(request_id)가 최종 멱등성 보장이다.
+- 동일 requestId 재호출/중복 메시지는 결과가 변하면 안 된다.
+
+### 보상 트랜잭션
+- 재고 보상(INCR)은 "예약 성공 후 확정 실패/중복"에서 정확히 1회만 발생해야 한다.
+
+---
+
+## 3. API 규칙
+- Claim: `POST /campaigns/{campaignId}/claim` → 202 + requestId
+- Status: `GET /claims/{requestId}`
+- SSE: `GET /claims/{requestId}/stream`
+- 인증은 MVP: `X-User-Id` 헤더로만 한다.
+
+---
+
+## 4. SSE 규칙(권장값 고정)
+- heartbeat: 15초
+- 최대 연결: 2분
+- 최종 상태(ISSUED/DUPLICATE/SOLD_OUT/FAILED)면 done 이벤트 전송 후 종료
+- SSE 불가 환경을 위해 폴링 API 유지
+
+---
+
+## 5. 보호모드 규칙
+- 수동 스위치 필수: protection.mode.enabled
+- (후속) 자동 트리거: consumer lag 기반
+- 보호모드 ON이면 claim은 503
+
+---
+
+## 6. 테스트 규칙
+- 통합 테스트는 Testcontainers 우선(Postgres)
+- 동시성 테스트는 ExecutorService 기반 소규모(예: 200 요청)
+- 모든 PR은 최소 1개의 테스트를 포함한다.
+- 테스트가 느리면, 단위 테스트 1개 + 통합 테스트 1개로 최소 구성한다.
+
+---
+
+## 7. 문서/커맨드 규칙
+- 변경된 정책/엔드포인트가 있으면 docs/에 반드시 반영한다.
+- README는 마지막에 한번에 정리하되, 실행 커맨드는 항상 최신이어야 한다.
