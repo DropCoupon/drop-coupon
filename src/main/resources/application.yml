@@ -1,0 +1,18 @@
+spring:
+  application:
+    name: drop-coupon
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      probes:
+        enabled: true
+
+logging:
+  pattern:
+    level: "%5p [requestId:%X{requestId}]"
+
