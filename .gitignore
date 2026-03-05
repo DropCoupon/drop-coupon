@@ -1,0 +1,9 @@
+docs/blogs/
+build/
+.gradle/
+.idea/
+out/
+
+.omc/
+.claude/
+bin/
