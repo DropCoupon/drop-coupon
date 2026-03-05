@@ -7,14 +7,16 @@ Spring Boot 대용량 트래픽 쿠폰 시스템 — Cursor Rules v1.0
 ## 0. 목표
 - PR 단위(1~2시간)로만 변경한다.
 - 동시성(초과/중복/멱등)을 깨뜨리는 변경은 절대 금지한다.
+- **모든 기능/버그 수정은 TDD로만 진행한다.**
 - 테스트 없는 기능 추가 금지(최소 1개 이상).
 
 ---
 
 ## 1. 코딩 규칙
-- Java 21, Spring Boot 3.2+ 기준
+- Java 25, Spring Boot 3.5+ 기준
 - 패키지 구조는 고정:
-  - com.example.coupon.{common,campaign,claim,infrastructure}
+ - io.dropcoupon.{common,campaign,claim,infrastructure}
+- **Javadoc**: 모든 public 클래스, 인터페이스, 메서드, 상수에는 Javadoc을 작성한다. 클래스/메서드는 목적과 동작을 한 줄 이상으로 설명하고, 파라미터·반환값·예외는 public API에 한해 @param, @return, @throws를 붙인다.
 - Controller는 DTO만 다루고, 비즈니스는 Service에서 처리한다.
 - Repository는 도메인 규칙을 알지 않으며, Service가 규칙을 소유한다.
 - 모든 public API는 Validation을 적용한다.
@@ -65,6 +67,9 @@ Spring Boot 대용량 트래픽 쿠폰 시스템 — Cursor Rules v1.0
 ---
 
 ## 6. 테스트 규칙
+- **예외적인 hotfix 상황을 제외하고, 테스트 없이 프로덕션 코드를 먼저 변경하는 행위는 금지한다.**
+- 항상 **테스트를 먼저 작성(TDD)** 하고, 구현은 테스트를 통과시키는 최소 단위부터 진행한다.
+- TDD 시 정상 케이스 뿐 아니라 **엣지 케이스(경계값, 오류/예외, 동시성 경쟁 상황)** 까지 포함해서 시나리오를 설계한다.
 - 통합 테스트는 Testcontainers 우선(Postgres)
 - 동시성 테스트는 ExecutorService 기반 소규모(예: 200 요청)
 - 모든 PR은 최소 1개의 테스트를 포함한다.
@@ -75,3 +80,10 @@ Spring Boot 대용량 트래픽 쿠폰 시스템 — Cursor Rules v1.0
 ## 7. 문서/커맨드 규칙
 - 변경된 정책/엔드포인트가 있으면 docs/에 반드시 반영한다.
 - README는 마지막에 한번에 정리하되, 실행 커맨드는 항상 최신이어야 한다.
+
+---
+
+## 8. 블로그 규칙
+- **작업 단위(PR) 하나가 끝날 때마다** 해당 작업을 정리한 블로그 글을 작성한다.
+- 게시처: **티스토리**.
+- 티스토리는 **PlantUML 렌더링**을 지원하므로, 아키텍처·흐름·시퀀스·상태 다이어그램 등은 **PlantUML을 적극 사용**한다.

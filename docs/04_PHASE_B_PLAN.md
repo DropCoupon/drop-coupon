@@ -5,8 +5,8 @@ High-Concurrency Coupon Issuance System
 ---
 
 ## 0. Fixed Tech Stack
-- Java 21
-- Spring Boot 3.2+
+- Java 25
+- Spring Boot 3.5+
 - Gradle
 - PostgreSQL
 - Redis
@@ -21,7 +21,7 @@ High-Concurrency Coupon Issuance System
 ## 1. Fixed Package Structure
 > 아래 구조는 끝까지 유지한다.
 ```
-com.example.coupon
+io.dropcoupon
 ├── common
 │    ├── config
 │    ├── exception
@@ -92,7 +92,7 @@ com.example.coupon
 - [ ] (C) requestId 생성/전파가 안정적으로 동작하는가? (중복 처리의 기반)
 
 ## Cursor prompt
-Spring Boot 3.2 + Java 21 + Gradle로 프로젝트를 만들고,
+Spring Boot 3.5 + Java 25 + Gradle로 프로젝트를 만들고,
 Actuator, Validation, Web 의존성을 추가해줘.
 RequestId를 생성/전파하는 Filter를 만들고(MDC 포함),
 @ControllerAdvice로 표준 에러 응답 포맷을 강제해줘.
