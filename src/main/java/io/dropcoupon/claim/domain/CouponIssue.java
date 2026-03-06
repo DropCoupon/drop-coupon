@@ -4,6 +4,10 @@ import jakarta.persistence.*;
 import java.time.Instant;
 import java.util.UUID;
 
+/**
+ * 쿠폰 발급 내역 엔티티.
+ * unique(campaign_id, user_id)로 1인 1매(B), unique(request_id)로 멱등성(C)을 보장한다.
+ */
 @Entity
 @Table(name = "coupon_issues")
 public class CouponIssue {
@@ -15,10 +19,10 @@ public class CouponIssue {
     @Column(name = "campaign_id", nullable = false)
     private UUID campaignId;
 
-    @Column(name = "user_id", nullable = false)
+    @Column(name = "user_id", nullable = false, length = 255)
     private String userId;
 
-    @Column(name = "request_id", nullable = false)
+    @Column(name = "request_id", nullable = false, length = 255)
     private String requestId;
 
     @Column(nullable = false, length = 20)

@@ -4,6 +4,9 @@ import jakarta.persistence.*;
 import java.time.Instant;
 import java.util.UUID;
 
+/**
+ * 쿠폰 캠페인(재고/기간) 엔티티.
+ */
 @Entity
 @Table(name = "campaigns")
 public class Campaign {
